@@ -5,14 +5,15 @@ import (
 	"github.com/tkuldeep/todo-backend/handlers"
 )
 
+// TodoAppContext is entity for managing todo features.
 type TodoAppContext struct {
 	FiberApp    *fiber.App
-	TodoHandler handlers.TodoHandler
+	TaskHandler handlers.TaskHandler
 }
 
 func setupRoutes(app *TodoAppContext) {
 	app.FiberApp.Get("/", handlers.Home)
 
-	app.FiberApp.Post("/todos", app.TodoHandler.CreateTodo)
-	app.FiberApp.Get("/todos", app.TodoHandler.ListTodos)
+	app.FiberApp.Post("/todos", app.TaskHandler.Create)
+	app.FiberApp.Get("/todos", app.TaskHandler.List)
 }

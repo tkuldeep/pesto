@@ -16,9 +16,10 @@ type PostgreInstance struct {
 	Db *gorm.DB
 }
 
-func NewDBInstance() TodoRepo {
+// Return Postgres db instance which is wrapped in TaskRepo interface.
+func NewDBInstance() TaskRepo {
 	dsn := fmt.Sprintf(
-		"host=db user=%s password=%s dbname=%s port=5432 sslmode=disable TimeZone=Asia/Shanghai",
+		"host=db user=%s password=%s dbname=%s port=5432 sslmode=disable TimeZone=Asia/Kolkata",
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
@@ -37,7 +38,7 @@ func NewDBInstance() TodoRepo {
 	db.Logger = logger.Default.LogMode(logger.Info)
 
 	log.Println("running migrations")
-	db.AutoMigrate(&models.Todo{})
+	db.AutoMigrate(&models.Task{})
 
 	return PostgreInstance{
 		Db: db,
