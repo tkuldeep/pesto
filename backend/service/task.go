@@ -16,7 +16,9 @@ const (
 // TaskManager is service to handle task CRUD related business.
 type TaskManager interface {
 	Create(*models.Task) error
-	List() ([]*models.Task, error)
+	List(map[string]string) ([]*models.Task, error)
+	Update(*models.Task) error
+	Delete(taskID int) error
 }
 
 type taskManager struct {
@@ -35,12 +37,20 @@ func (tm taskManager) Create(task *models.Task) error {
 		return err
 	}
 	task.Status = status
-	tm.repo.Create(task)
-	return nil
+
+	return tm.repo.Create(task)
 }
 
-func (tm taskManager) List() ([]*models.Task, error) {
-	tasks, err := tm.repo.List()
+func (tm taskManager) List(query map[string]string) ([]*models.Task, error) {
+	dbQuery := map[string]int{}
+	if _, ok := query["status"]; ok {
+		status, err := getStatusValByStr(query["status"])
+		if err != nil {
+			return nil, err
+		}
+		dbQuery["status"] = status
+	}
+	tasks, err := tm.repo.List(dbQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -50,6 +60,21 @@ func (tm taskManager) List() ([]*models.Task, error) {
 	}
 
 	return tasks, nil
+}
+
+func (tm taskManager) Update(task *models.Task) error {
+	err := tm.repo.Update(task)
+	if err != nil {
+		return err
+	}
+	status, _ := getStatusValByInt(task.Status)
+	task.TaskStatus = status
+
+	return nil
+}
+
+func (tm taskManager) Delete(taskID int) error {
+	return tm.repo.Delete(uint(taskID))
 }
 
 // helper function to get task status by index or int repersentation

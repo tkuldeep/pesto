@@ -14,6 +14,8 @@ type TodoAppContext struct {
 func setupRoutes(app *TodoAppContext) {
 	app.FiberApp.Get("/", handlers.Home)
 
-	app.FiberApp.Post("/todos", app.TaskHandler.Create)
-	app.FiberApp.Get("/todos", app.TaskHandler.List)
+	app.FiberApp.Post("/tasks", app.TaskHandler.Create)
+	app.FiberApp.Get("/tasks", app.TaskHandler.List)
+	app.FiberApp.Delete("/tasks/:id", app.TaskHandler.Delete)
+	app.FiberApp.Put("/tasks/:id", app.TaskHandler.Update)
 }
