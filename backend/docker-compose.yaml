@@ -1,8 +1,9 @@
 version: '3.9'
 
 services:
-  web:
+  backend:
     build: .
+    container_name: todo_backend
     env_file:
       - .env
     ports:
@@ -12,6 +13,7 @@ services:
     command: air ./cmd/main.go -b 0.0.0.0
   db:
     image: postgres:alpine
+    container_name: postgres
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
