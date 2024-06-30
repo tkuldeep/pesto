@@ -15,7 +15,9 @@ func setupRoutes(app *TodoAppContext) {
 	app.FiberApp.Get("/", handlers.Home)
 
 	app.FiberApp.Post("/tasks", app.TaskHandler.Create)
+	app.FiberApp.Get("/tasks/:id", app.TaskHandler.Get)
 	app.FiberApp.Get("/tasks", app.TaskHandler.List)
 	app.FiberApp.Delete("/tasks/:id", app.TaskHandler.Delete)
 	app.FiberApp.Put("/tasks/:id", app.TaskHandler.Update)
+	app.FiberApp.Post("/tasks/:id/status", app.TaskHandler.ChangeStatus)
 }

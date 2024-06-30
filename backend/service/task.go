@@ -19,6 +19,8 @@ type TaskManager interface {
 	List(map[string]string) ([]*models.Task, error)
 	Update(*models.Task) error
 	Delete(taskID int) error
+	ChangeStatus(*models.Task) error
+	Get(taskID int) (*models.Task, error)
 }
 
 type taskManager struct {
@@ -71,6 +73,28 @@ func (tm taskManager) Update(task *models.Task) error {
 	task.TaskStatus = status
 
 	return nil
+}
+
+func (tm taskManager) ChangeStatus(task *models.Task) error {
+	status, err := getStatusValByStr(task.TaskStatus)
+	if err != nil {
+		return err
+	}
+	task.Status = status
+	err = tm.repo.ChangeStatus(task)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (tm taskManager) Get(taskID int) (*models.Task, error) {
+	task, err := tm.repo.Get(uint(taskID))
+	status, _ := getStatusValByInt(task.Status)
+	task.TaskStatus = status
+
+	return task, err
 }
 
 func (tm taskManager) Delete(taskID int) error {

@@ -24,6 +24,12 @@ type TaskHandler interface {
 	List(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
+	ChangeStatus(c *fiber.Ctx) error
+	Get(c *fiber.Ctx) error
+}
+
+type TaskStatus struct {
+	Status string `json:"status"`
 }
 
 // Return instance of todo app
@@ -118,4 +124,56 @@ func (ta TodoApp) Delete(c *fiber.Ctx) error {
 	c.Status(http.StatusNoContent)
 
 	return nil
+}
+
+func (ta TodoApp) ChangeStatus(c *fiber.Ctx) error {
+	status := new(TaskStatus)
+	if err := c.BodyParser(status); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	taskIDStr := c.Params("id")
+	taskID, err := strconv.Atoi(taskIDStr)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+	task := new(models.Task)
+	task.ID = uint(taskID)
+	task.TaskStatus = status.Status
+
+	// Call task manager servie to change  list of tasks.
+	err = ta.taskManager.ChangeStatus(task)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"ok": true,
+	})
+}
+
+func (ta TodoApp) Get(c *fiber.Ctx) error {
+	taskIDStr := c.Params("id")
+	taskID, err := strconv.Atoi(taskIDStr)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	// Call task manager servie to delete of taks given ID.
+	task, err := ta.taskManager.Get(taskID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.Status(200).JSON(task)
 }

@@ -13,6 +13,8 @@ type TaskRepo interface {
 	List(query map[string]int) ([]*models.Task, error)
 	Update(*models.Task) error
 	Delete(taskID uint) error
+	ChangeStatus(*models.Task) error
+	Get(taskID uint) (*models.Task, error)
 }
 
 func (pd PostgreInstance) Create(task *models.Task) error {
@@ -52,10 +54,27 @@ func (pd PostgreInstance) Update(task *models.Task) error {
 	return tx.Error
 }
 
+func (pd PostgreInstance) ChangeStatus(task *models.Task) error {
+	tx := pd.Db.Model(&models.Task{}).Where("id = ?", task.ID).Update("status", task.Status)
+
+	return tx.Error
+}
+
 func (pd PostgreInstance) Delete(taskID uint) error {
 	task := new(models.Task)
 	task.ID = taskID
 	tx := pd.Db.Delete(task)
 
 	return tx.Error
+}
+
+func (pd PostgreInstance) Get(taskID uint) (*models.Task, error) {
+	task := new(models.Task)
+	task.ID = taskID
+	tx := pd.Db.First(task)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return task, nil
 }
