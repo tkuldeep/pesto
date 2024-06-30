@@ -1,0 +1,1 @@
+export {DialogComp} from "./DialogComp"
